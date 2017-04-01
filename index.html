@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Drag and Drop Widget</title>
+
+    <!-- Bootstrap -->
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/public/css/styles.css" rel="stylesheet">
+    <link href="/public/css/font-awesome.min.css" rel="stylesheet">
+
+    <script src="/public/js/jquery.min.js"></script>
+    <script src="/public/js/vue.min.js"></script>
+</head>
+
+<body>
+<div class="widget-upload" id="uploadFiles"  @dragover="dragover" @drop="dropprevent">
+    <div class="top">
+        <div class="table-div">
+            <div class="table-div-cell">
+                <p v-if="errorMessage">{{ errorMessage }}</p>
+                <h2>Drag and drop widget</h2>
+            </div>
+        </div>
+    </div>
+    <div @dragleave="dragleave" @drop="drop" class="draggable-area">
+        <i class="fa fa-upload" aria-hidden="true"></i>
+        <p>Drag your files here</p>
+    </div>
+    <div class="bottom"> </div>
+    <div v-if="files.length" class="uploaded-files-cont">
+        <!-- Single file -->
+        <div v-for="(file, index) in files" class="uploaded-file-single">
+            <div class="uploaded-files-single-inner">
+                <div class="upload-progress" :style="{ width: process[index]+ '%'}"></div>
+                <p>{{ file.name }}</p>
+                <i class="fa" :class="classes[index]" aria-hidden="true" @click="cancelUpload(file)"></i>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: '#uploadFiles',
+        data: {
+            files: [],
+            errorMessage: '',
+            count: 0,
+            process: {},
+            classes: {},
+        },
+        methods: {
+            drop: function(e) {
+                var files = e.dataTransfer.files;
+                var _this = this;
+                for (let i = 0, f; f = files[i]; i++) {
+                    f.finished = false;
+                    this.files.push(f);
+                    var count = _this.files.length - 1;
+                    _this.$set(_this.process, count, 0);
+                    _this.$set(_this.classes, count, 'fa-times-circle-o');
+                }
+                e.preventDefault();
+                if ( e.target.className == "draggable-area active" ) {
+                    e.target.classList.remove('active');
+                }
+            },
+            dragover: function(e) {
+                e.preventDefault();
+                //console.log(e);
+                if ( e.target.className == "draggable-area" ) {
+                    e.target.classList.add('active');
+                }
+            },
+            dragleave: function(e) {
+                e.preventDefault();
+                if ( e.target.className == "draggable-area active" ) {
+                    e.target.classList.remove('active');
+                }
+            },
+            dropprevent: function(e) {
+                e.preventDefault();
+                if ( e.target.className == "draggable-area active" ) {
+                    e.target.classList.remove('active');
+                }
+            },
+            cancelUpload: function(file) {
+                var index = this.files.indexOf(file);
+                this.files.splice(index, 1);
+            },
+        }})
+</script>
+</html>
